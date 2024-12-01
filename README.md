@@ -1,6 +1,6 @@
 # Telegram Image Compressor Bot (telegram-image-compressor)
 
-A Telegram bot that validates image URLs, downloads the images, compresses them using FFMPEG, and shares the compressed image back with the user.  
+A Telegram bot that validates image URLs, downloads the pictures, compresses them, and shares the compressed picture back with the user.
 
 ## Features
 
