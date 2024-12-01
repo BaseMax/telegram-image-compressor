@@ -4,6 +4,7 @@ from PIL import Image
 from io import BytesIO
 from telegram import Update
 from dotenv import load_dotenv
+from telegram.ext import filters
 from flask import Flask, send_from_directory
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
 
@@ -109,7 +110,8 @@ def main():
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_url))
-    application.add_handler(MessageHandler(filters.PHOTO | filters.DOCUMENT, handle_file))
+    application.add_handler(MessageHandler(filters.PHOTO, handle_file))
+    application.add_handler(MessageHandler(filters.Document, handle_file))
 
     from threading import Thread
     flask_thread = Thread(target=app.run, kwargs={"host": "0.0.0.0", "port": 5000})
