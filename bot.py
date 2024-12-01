@@ -21,12 +21,15 @@ os.makedirs(IMAGE_DIR, exist_ok=True)
 
 app = Flask(__name__)
 
+
 @app.route('/images/<path:filename>')
 def serve_image(filename):
     return send_from_directory(IMAGE_DIR, filename)
 
+
 async def start(update: Update, context: CallbackContext):
     await update.message.reply_text("Send me a URL of an image or upload an image/document, and I'll compress it for you!")
+
 
 async def handle_url(update: Update, context: CallbackContext):
     url = update.message.text.strip()
@@ -67,6 +70,7 @@ async def handle_url(update: Update, context: CallbackContext):
     except Exception as e:
         await update.message.reply_text(f"Error processing image: {e}")
 
+
 async def handle_file(update: Update, context: CallbackContext):
     user_id = update.message.chat_id
     file = update.message.photo[-1] if update.message.photo else update.message.document
@@ -76,7 +80,8 @@ async def handle_file(update: Update, context: CallbackContext):
         file_path = os.path.join(IMAGE_DIR, f"{user_id}_image.jpg")
 
         new_file = await context.bot.get_file(file_id)
-        await new_file.download(file_path)
+
+        await new_file.download_to_drive(file_path)
 
         compressed_path = os.path.join(IMAGE_DIR, f"{user_id}_compressed.jpg")
         compress_image(file_path, compressed_path)
@@ -93,6 +98,7 @@ async def handle_file(update: Update, context: CallbackContext):
     else:
         await update.message.reply_text("Please send an image or document to compress.")
 
+
 def download_image(url: str, file_path: str):
     response = requests.get(url)
     response.raise_for_status()
@@ -100,10 +106,12 @@ def download_image(url: str, file_path: str):
     with open(file_path, 'wb') as f:
         f.write(response.content)
 
+
 def compress_image(input_file: str, output_file: str):
     with Image.open(input_file) as img:
         img = img.convert("RGB")
         img.save(output_file, format="JPEG", quality=80, optimize=True)
+
 
 def main():
     application = Application.builder().token(BOT_TOKEN).build()
