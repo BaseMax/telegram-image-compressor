@@ -25,7 +25,7 @@ def serve_image(filename):
     return send_from_directory(IMAGE_DIR, filename)
 
 async def start(update: Update, context: CallbackContext):
-    await update.message.reply_text("Send me a URL of an image, and I'll compress it for you!")
+    await update.message.reply_text("Send me a URL of an image or upload an image/document, and I'll compress it for you!")
 
 async def handle_url(update: Update, context: CallbackContext):
     url = update.message.text.strip()
@@ -66,6 +66,32 @@ async def handle_url(update: Update, context: CallbackContext):
     except Exception as e:
         await update.message.reply_text(f"Error processing image: {e}")
 
+async def handle_file(update: Update, context: CallbackContext):
+    user_id = update.message.chat_id
+    file = update.message.photo[-1] if update.message.photo else update.message.document
+
+    if file:
+        file_id = file.file_id
+        file_path = os.path.join(IMAGE_DIR, f"{user_id}_image.jpg")
+
+        new_file = await context.bot.get_file(file_id)
+        await new_file.download(file_path)
+
+        compressed_path = os.path.join(IMAGE_DIR, f"{user_id}_compressed.jpg")
+        compress_image(file_path, compressed_path)
+
+        await update.message.reply_text("Image compressed successfully!")
+
+        if os.path.getsize(compressed_path) > 50 * 1024 * 1024:
+            download_url = f"{BASE_URL}/images/{user_id}_compressed.jpg"
+            await update.message.reply_text(
+                f"The file is too large to send via Telegram. You can download it from: {download_url}"
+            )
+        else:
+            await update.message.reply_document(document=open(compressed_path, "rb"))
+    else:
+        await update.message.reply_text("Please send an image or document to compress.")
+
 def download_image(url: str, file_path: str):
     response = requests.get(url)
     response.raise_for_status()
@@ -83,6 +109,7 @@ def main():
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_url))
+    application.add_handler(MessageHandler(filters.PHOTO | filters.DOCUMENT, handle_file))
 
     from threading import Thread
     flask_thread = Thread(target=app.run, kwargs={"host": "0.0.0.0", "port": 5000})
