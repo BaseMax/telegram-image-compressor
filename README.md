@@ -8,7 +8,7 @@ A Telegram bot that validates image URLs, downloads the images, compresses them 
 - Checks if the URL returns a 200 HTTP status code (no 404 or invalid URLs).
 - Retrieves file metadata, such as image size, without downloading the image.
 - Downloads the image in the background.
-- Compresses the image using FFMPEG with efficient settings (`libx264`, `crf 32`).
+- Compresses the image with efficient settings.
 - Sends the compressed image back to the user as a downloadable file.
 
 ![Telegram Image Compressor Bot](telegram.jpg)
