@@ -13,8 +13,6 @@ A Telegram bot that validates image URLs, downloads the images, compresses them 
 
 ![Telegram Image Compressor Bot](telegram.jpg)
 
-![Telegram Image Compressor Bot](demo.jpg)
-
 ## Installation
 
 1. Clone the repository:
